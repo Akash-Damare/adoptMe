@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import Pet from "./Pet";
+import Results from "./Results";
+import useBreedList from "./useBreedList";
 
 const ANIMALS = ["dog", "cat", "rabbit", "reptille"];
 
@@ -8,11 +10,11 @@ const SearchParams = () => {
   const [animal, setAnimal] = useState("");
   const [breed, setBreed] = useState("");
   const [pets, setPets] = useState([]);
-  const breeds = [];
+  const [breeds] = useBreedList(animal);
 
   useEffect(() => {
     requestPets();
-  }, []); //eslint-desable-line eslint
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function requestPets() {
     const res = await fetch(
@@ -20,13 +22,17 @@ const SearchParams = () => {
     );
 
     const json = await res.json();
-    console.log(json.pets);
     setPets(json.pets);
   }
 
   return (
     <div className="search-params">
-      <form>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          requestPets();
+        }}
+      >
         <label htmlFor="location">
           location
           <input
@@ -52,33 +58,34 @@ const SearchParams = () => {
             ))}
           </select>
         </label>
-
         <label htmlFor="breed">
-          Breed
+          animal
           <select
             id="breed"
             value={breed}
             onChange={e => setBreed(e.target.value)}
             onBlur={e => setBreed(e.target.value)}
-          ></select>
-          <option>
+          >
+            <option />
             {breeds.map(breed => (
               <option key={breed} value={breed}>
                 {breed}
               </option>
             ))}
-          </option>
+          </select>
         </label>
+
         <button>Submit</button>
       </form>
-      {pets.map(pet => (
+      <Results pets={pets} />
+      {/* {pets.map(pet => (
         <Pet
           name={pet.name}
           animal={pet.animal}
           breed={pet.breed}
           key={pet.id}
         />
-      ))}
+      ))} */}
     </div>
   );
 };
